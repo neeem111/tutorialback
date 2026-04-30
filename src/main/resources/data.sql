@@ -4,6 +4,14 @@ INSERT INTO category(name)
 VALUES ('Ameritrash');
 INSERT INTO category(name)
 VALUES ('Familiar');
+
+INSERT INTO cliente(name)
+VALUES ('Carmen');
+INSERT INTO cliente(name)
+VALUES ('Carmen2');
+INSERT INTO cliente(name)
+VALUES ('Carmen3');
+
 INSERT INTO author(name, nationality)
 VALUES ('Alan R. Moon', 'US');
 INSERT INTO author(name, nationality)
