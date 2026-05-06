@@ -2,6 +2,9 @@ package com.ccsw.tutorial.prestamo;
 
 import com.ccsw.tutorial.cliente.ClienteService;
 import com.ccsw.tutorial.game.GameService;
+import com.ccsw.tutorial.prestamo.model.Prestamo;
+import com.ccsw.tutorial.prestamo.model.PrestamoDto;
+import com.ccsw.tutorial.prestamo.model.PrestamoSearchDto;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -23,70 +26,60 @@ public class PrestamoServiceImpl implements PrestamoService {
     GameService gameService;
 
     @Autowired
-    ClienteService clientService;
+    ClienteService clienteService;
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public Page<prestamo> find(prestamoSearchDto dto) {
-
-        Specification<prestamo> spec = prestamoSpecification.createSpecification(dto);
-
+    public Page<Prestamo> find(PrestamoSearchDto dto) {
+        Specification<Prestamo> spec = PrestamoSpecification.createSpecification(dto);
         return this.prestamoRepository.findAll(spec, dto.getPageable().getPageable());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void save(Long id, prestamoDto dto) {
-
-        prestamo prestamo;
+    public void save(Long id, PrestamoDto dto) {
+        Prestamo prestamo;
 
         if (id == null) {
-            prestamo = new prestamo();
+            prestamo = new Prestamo();
         } else {
             prestamo = this.prestamoRepository.findById(id).orElse(null);
         }
 
         if (dto.getEndDate().before(dto.getStartDate())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La fecha fin no puede ser anterior a la de inicio");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "La fecha fin no puede ser anterior a la de inicio");
         }
 
         long diff = dto.getEndDate().getTime() - dto.getStartDate().getTime();
-        long days = diff / (1000 * 60 * 60 * 24);
-
+        long days = diff / (1000L * 60 * 60 * 24);
         if (days > 14) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El préstamo no puede superar 14 días");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "El préstamo no puede superar 14 días");
         }
 
-        List<prestamo> overlappingGame = this.prestamoRepository.findOverlappingGame(dto.getGame().getId(), id, dto.getStartDate(), dto.getEndDate());
-
+        List<Prestamo> overlappingGame = this.prestamoRepository.findOverlappingGame(
+                dto.getGame().getId(), id, dto.getStartDate(), dto.getEndDate());
         if (!overlappingGame.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El juego ya está prestado en ese rango de fechas");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "El juego ya está prestado en ese rango de fechas");
         }
 
-        List<prestamo> overlappingClient = this.prestamoRepository.findOverlappingClient(dto.getClient().getId(), id, dto.getStartDate(), dto.getEndDate());
-
+        List<Prestamo> overlappingClient = this.prestamoRepository.findOverlappingClient(
+                dto.getClient().getId(), id, dto.getStartDate(), dto.getEndDate());
         if (overlappingClient.size() >= 2) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El cliente ya tiene 2 préstamos en ese rango de fechas");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "El cliente ya tiene 2 préstamos en ese rango de fechas");
         }
 
         prestamo.setGame(gameService.get(dto.getGame().getId()));
-        prestamo.setClient(clientService.get(dto.getClient().getId()));
+        prestamo.setClient(clienteService.get(dto.getClient().getId()));
         prestamo.setStartDate(dto.getStartDate());
         prestamo.setEndDate(dto.getEndDate());
 
         this.prestamoRepository.save(prestamo);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void delete(Long id) {
-
         this.prestamoRepository.deleteById(id);
     }
 }
