@@ -1,52 +1,46 @@
 package com.ccsw.tutorial.prestamo;
 
 import com.ccsw.tutorial.prestamo.model.Prestamo;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Date;
 import java.util.List;
 
-/**
- * @author ccsw
- *
- */
-public interface LoanRepository extends CrudRepository<Prestamo, Long>, JpaSpecificationExecutor<Loan> {
+public interface PrestamoRepository extends CrudRepository<Prestamo, Long>, JpaSpecificationExecutor<Prestamo> {
 
-    /**
-     * Método para buscar préstamos de un juego que se solapen en un rango de fechas
-     *
-     * @param gameId id del juego
-     * @param loanId id del préstamo
-     * @param startDate fecha de inicio
-     * @param endDate fecha de fin
-     * @return lista de préstamos solapados
-     */
-    @Query("""
-                SELECT l FROM Prestamo l
-                WHERE l.game.id = :gameId
-                AND l.id <> COALESCE(:prestamoId, -1)
-                AND l.startDate <= :endDate 
-                AND l.endDate >= :startDate
-            """)
-    List<Prestamo> findOverlappingGame(Long gameId, Long loanId, Date startDate, Date endDate);
+    Page<Prestamo> findAll(Specification<Prestamo> spec, Pageable pageable);
 
-    /**
-     * Método para buscar préstamos de un cliente que se solapen en un rango de fechas
-     *
-     * @param clientId id del cliente
-     * @param loanId id del préstamo
-     * @param startDate fecha de inicio
-     * @param endDate fecha de fin
-     * @return lista de préstamos solapados
-     */
     @Query("""
-                SELECT l FROM Loan l
-                WHERE l.client.id = :clientId
-                AND l.id <> COALESCE(:loanId, -1)
-                AND l.startDate <= :endDate 
-                AND l.endDate >= :startDate
+            SELECT p FROM Prestamo p
+            WHERE p.game.id = :gameId
+            AND p.id <> COALESCE(:prestamoId, -1)
+            AND p.startDate <= :endDate
+            AND p.endDate >= :startDate
             """)
-    List<Loan> findOverlappingClient(Long clientId, Long loanId, Date startDate, Date endDate);
+    List<Prestamo> findOverlappingGame(
+            @Param("gameId") Long gameId,
+            @Param("prestamoId") Long prestamoId,
+            @Param("startDate") Date startDate,
+            @Param("endDate") Date endDate
+    );
+
+    @Query("""
+            SELECT p FROM Prestamo p
+            WHERE p.client.id = :clientId
+            AND p.id <> COALESCE(:prestamoId, -1)
+            AND p.startDate <= :endDate
+            AND p.endDate >= :startDate
+            """)
+    List<Prestamo> findOverlappingClient(
+            @Param("clientId") Long clientId,
+            @Param("prestamoId") Long prestamoId,
+            @Param("startDate") Date startDate,
+            @Param("endDate") Date endDate
+    );
 }
