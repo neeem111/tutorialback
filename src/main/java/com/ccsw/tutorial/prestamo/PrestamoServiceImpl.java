@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
@@ -36,26 +37,21 @@ public class PrestamoServiceImpl implements PrestamoService {
 
     @Override
     public void save(Long id, PrestamoDto dto) {
-        Prestamo prestamo;
 
-        if (id == null) {
-            prestamo = new Prestamo();
-        } else {
-            prestamo = this.prestamoRepository.findById(id).orElse(null);
-        }
-
-        if (dto.getEndDate().before(dto.getStartDate())) {
+        // Validación 1: fin no puede ser anterior a inicio
+        if (dto.getEndDate().isBefore(dto.getStartDate())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "La fecha fin no puede ser anterior a la de inicio");
         }
 
-        long diff = dto.getEndDate().getTime() - dto.getStartDate().getTime();
-        long days = diff / (1000L * 60 * 60 * 24);
+        // Validación 2: máximo 14 días
+        long days = ChronoUnit.DAYS.between(dto.getStartDate(), dto.getEndDate());
         if (days > 14) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "El préstamo no puede superar 14 días");
         }
 
+        // Validación 3: el juego no puede estar prestado en el mismo rango
         List<Prestamo> overlappingGame = this.prestamoRepository.findOverlappingGame(
                 dto.getGame().getId(), id, dto.getStartDate(), dto.getEndDate());
         if (!overlappingGame.isEmpty()) {
@@ -63,11 +59,20 @@ public class PrestamoServiceImpl implements PrestamoService {
                     "El juego ya está prestado en ese rango de fechas");
         }
 
+        // Validación 4: el cliente no puede tener más de 2 préstamos en el mismo rango
         List<Prestamo> overlappingClient = this.prestamoRepository.findOverlappingClient(
                 dto.getClient().getId(), id, dto.getStartDate(), dto.getEndDate());
         if (overlappingClient.size() >= 2) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "El cliente ya tiene 2 préstamos en ese rango de fechas");
+        }
+
+        // Construir entidad después de validar
+        Prestamo prestamo;
+        if (id == null) {
+            prestamo = new Prestamo();
+        } else {
+            prestamo = this.prestamoRepository.findById(id).orElse(null);
         }
 
         prestamo.setGame(gameService.get(dto.getGame().getId()));
