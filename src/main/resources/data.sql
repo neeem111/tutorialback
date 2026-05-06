@@ -38,11 +38,11 @@ VALUES ('Los viajes de Marco Polo', '12', 1, 3);
 INSERT INTO game(title, age, category_id, author_id)
 VALUES ('Azul', '8', 3, 5);
 
-INSERT INTO prestamo (cliente_id, game_id, start_date, end_date)
+INSERT INTO loan (client_id, game_id, start_date, end_date)
 VALUES (1, 2, '2024-05-01', '2024-05-05');
 
-INSERT INTO prestamo (cliente_id, game_id, start_date, end_date)
+INSERT INTO loan (client_id, game_id, start_date, end_date)
 VALUES (2, 3, '2024-05-03', '2024-05-10');
 
-INSERT INTO prestamo (cliente_id, game_id, start_date, end_date)
+INSERT INTO loan (client_id, game_id, start_date, end_date)
 VALUES (1, 1, '2024-05-12', '2024-05-18');
