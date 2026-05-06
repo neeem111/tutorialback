@@ -3,13 +3,8 @@ package com.ccsw.tutorial.prestamo.model;
 import com.ccsw.tutorial.cliente.model.Cliente;
 import com.ccsw.tutorial.game.model.Game;
 import jakarta.persistence.*;
-
 import java.time.LocalDate;
 
-/**
- * @author ccsw
- *
- */
 @Entity
 @Table(name = "prestamo")
 public class Prestamo {
@@ -19,11 +14,12 @@ public class Prestamo {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    // Campo renombrado a 'client' para que ModelMapper case con PrestamoDto.client
+    @ManyToOne
     @JoinColumn(name = "cliente_id", nullable = false)
-    private Cliente cliente;
+    private Cliente client;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "game_id", nullable = false)
     private Game game;
 
@@ -33,43 +29,18 @@ public class Prestamo {
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
 
-    public Long getId() {
-        return this.id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public Cliente getClient() { return client; }
+    public void setClient(Cliente client) { this.client = client; }
 
-    public Cliente getClient() {
-        return this.cliente;
-    }
+    public Game getGame() { return game; }
+    public void setGame(Game game) { this.game = game; }
 
-    public void setClient(Cliente client) {
-        this.cliente = client;
-    }
+    public LocalDate getStartDate() { return startDate; }
+    public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
 
-    public Game getGame() {
-        return this.game;
-    }
-
-    public void setGame(Game game) {
-        this.game = game;
-    }
-
-    public LocalDate getStartDate() {
-        return this.startDate;
-    }
-
-    public void setStartDate(LocalDate startDate) {
-        this.startDate = startDate;
-    }
-
-    public LocalDate getEndDate() {
-        return this.endDate;
-    }
-
-    public void setEndDate(LocalDate endDate) {
-        this.endDate = endDate;
-    }
+    public LocalDate getEndDate() { return endDate; }
+    public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
 }
