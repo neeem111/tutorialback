@@ -48,7 +48,6 @@ public class LoanServiceImpl implements LoanService {
 
     @Override
     public void save(Long id, LoanDto dto) throws Exception {
-
         if (dto.getEndDate().isBefore(dto.getStartDate())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La fecha fin no puede ser anterior a la fecha inicio");
         }
@@ -75,17 +74,14 @@ public class LoanServiceImpl implements LoanService {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El cliente ya tiene más de 2 prestamos en la fecha " + date);
             }
         }
-
         loanRepository.save(loan);
     }
 
     @Override
     public void delete(Long id) throws Exception {
-
         if (!loanRepository.existsById(id)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No existe el prestamo");
         }
-
         loanRepository.deleteById(id);
     }
 }
