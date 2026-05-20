@@ -59,7 +59,7 @@ public class LoanServiceImpl implements LoanService {
 
         return this.loanRepository.findAll(spec, PageRequest.of(page, size)).map(loan -> {
             LoanDto dto = modelMapper.map(loan, LoanDto.class);
-
+            //para no cambias todo el mapper
             dto.setClientId(loan.getClient().getId());
             dto.setClientName(loan.getClient().getName());
             dto.setGameId(loan.getGame().getId());
