@@ -92,8 +92,6 @@ public class LoanServiceImpl implements LoanService {
         for (LocalDate d = dto.getStartDate(); !d.isAfter(dto.getEndDate()); d = d.plusDays(1)) {
 
             LocalDate currentDate = d;
-
-            // ✅ GAME VALIDATION
             Specification<Loan> gameSpec = (root, query, builder) -> {
 
                 var predicate = builder.and(builder.equal(root.get("game").get("id"), dto.getGameId()), builder.between(builder.literal(currentDate), root.get("startDate"), root.get("endDate")));
@@ -109,10 +107,9 @@ public class LoanServiceImpl implements LoanService {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El juego ya está prestado en la fecha " + currentDate);
             }
 
-            // ✅ CLIENT VALIDATION
             Specification<Loan> clientSpec = (root, query, builder) -> {
 
-                var predicate = builder.and(builder.equal(root.get("client").get("id"), dto.getClientId()), builder.between(builder.literal(currentDate), root.get("startDate"), root.get("endDate")));
+                var predicate = builder.and(builder.equal(root.get("cliente").get("id"), dto.getClientId()), builder.between(builder.literal(currentDate), root.get("startDate"), root.get("endDate")));
 
                 if (id != null) {
                     predicate = builder.and(predicate, builder.notEqual(root.get("id"), id));

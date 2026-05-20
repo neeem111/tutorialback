@@ -11,7 +11,7 @@ public class LoanSpecification {
         return (root, query, builder) -> {
             if (clientId == null)
                 return null;
-            return builder.equal(root.get("client").get("id"), clientId);
+            return builder.equal(root.get("cliente").get("id"), clientId);
         };
     }
 
